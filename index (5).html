@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GESTÃO LEGISLATIVA — DEP. MARCOS TAVARES</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --vm:#C0000C;--vm2:#8B0008;--vm3:#5A0005;
+  --preto:#0D0D0D;--preto2:#161616;--preto3:#1E1E1E;--preto4:#242424;
+  --branco:#FFFFFF;
+  --verde:#5DCAA5;--amarelo:#EF9F27;--azul:#4A9EE8;
+}
+html,body{min-height:100%;background:var(--preto);color:var(--branco);font-family:'Segoe UI',system-ui,sans-serif}
+
+/* TOPO */
+.topo{background:var(--vm);padding:0 20px;display:flex;align-items:stretch;justify-content:space-between;flex-wrap:wrap;gap:0;border-bottom:3px solid var(--vm3)}
+.topo-esq{display:flex;align-items:center;gap:14px;padding:14px 0}
+.logo-box{background:var(--preto);width:46px;height:46px;display:flex;align-items:center;justify-content:center;border-radius:3px;flex-shrink:0}
+.logo-box i{font-size:24px;color:var(--vm)}
+.topo-titulo{color:var(--branco);font-size:15px;font-weight:700;letter-spacing:2px;text-transform:uppercase}
+.topo-sub{color:rgba(255,255,255,.8);font-size:10px;letter-spacing:1px;text-transform:uppercase;margin-top:2px}
+.topo-dir{display:flex;align-items:center;gap:10px;padding:14px 0}
+.dep-badge{display:flex;align-items:center;gap:10px;background:var(--vm3);border:1px solid rgba(255,255,255,.2);border-radius:4px;padding:8px 12px;cursor:pointer;transition:background .15s}
+.dep-badge:hover{background:var(--vm2)}
+.dep-foto{width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.4);background:var(--preto)}
+.dep-info{line-height:1.3}
+.dep-nome{font-size:11px;font-weight:700;color:var(--branco);text-transform:uppercase;letter-spacing:.5px}
+.dep-partido{font-size:10px;color:rgba(255,255,255,.65);letter-spacing:.3px}
+.sync-badge{font-size:10px;padding:5px 11px;border-radius:3px;display:flex;align-items:center;gap:5px;text-transform:uppercase;letter-spacing:.5px;font-weight:600;transition:all .2s}
+.sync-badge.ok{background:var(--preto);color:var(--verde);border:1px solid var(--verde)}
+.sync-badge.err{background:var(--preto);color:#F09595;border:1px solid #F09595}
+.sync-badge.saving{background:var(--preto);color:var(--amarelo);border:1px solid var(--amarelo)}
+.sync-badge.loading{background:var(--preto);color:var(--azul);border:1px solid var(--azul)}
+
+/* PAINEL API */
+.api-panel-bar{background:var(--preto3);border-bottom:1px solid rgba(74,158,232,.3);padding:14px 20px;display:none}
+.api-panel-bar.open{display:block}
+.api-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
+.api-info-item{background:var(--preto);border:1px solid rgba(74,158,232,.2);border-radius:3px;padding:10px 12px}
+.api-info-label{font-size:9px;color:rgba(74,158,232,.7);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px;font-weight:600}
+.api-info-val{font-size:12px;color:var(--branco);font-weight:600}
+.api-actions{display:flex;gap:8px;align-items:center}
+
+/* BANNER */
+.api-banner{background:rgba(74,158,232,.06);border-bottom:1px solid rgba(74,158,232,.2);padding:10px 20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.api-banner span{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:rgba(255,255,255,.5)}
+.api-btn{font-size:10px;padding:6px 12px;cursor:pointer;border-radius:3px;text-transform:uppercase;letter-spacing:.8px;font-weight:600;transition:all .15s;background:var(--azul);border:1px solid rgba(74,158,232,.5);color:var(--branco);margin-left:auto}
+.api-btn:hover{background:#3a8dd6}
+
+/* CORPO */
+.corpo{padding:16px 20px}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+.stat{background:var(--preto2);border:1px solid rgba(192,0,12,.25);border-radius:4px;padding:14px 16px;position:relative;overflow:hidden}
+.stat::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--vm)}
+.stat-num{font-size:28px;font-weight:700;color:var(--vm);letter-spacing:-1px;line-height:1}
+.stat-label{font-size:10px;color:rgba(255,255,255,.45);margin-top:4px;text-transform:uppercase;letter-spacing:1px}
+.stat-sub{font-size:10px;color:rgba(255,255,255,.25);margin-top:2px;letter-spacing:.3px}
+
+/* TABS */
+.tabs{display:flex;margin-bottom:14px;background:var(--preto2);border:1px solid rgba(192,0,12,.25);border-radius:4px;overflow:hidden}
+.tab{font-size:10px;padding:10px 14px;cursor:pointer;color:rgba(255,255,255,.45);background:none;border:none;border-right:1px solid rgba(192,0,12,.15);text-transform:uppercase;letter-spacing:1px;font-weight:600;transition:all .15s;flex:1;text-align:center}
+.tab:last-child{border-right:none}
+.tab.active{background:var(--vm);color:var(--branco)}
+.tab:hover:not(.active){color:var(--branco);background:rgba(192,0,12,.15)}
+
+/* FILTROS */
+.filter-bar{background:var(--preto2);border:1px solid rgba(192,0,12,.25);border-radius:4px;padding:12px 14px;margin-bottom:14px}
+.filter-label{font-size:10px;color:rgba(255,255,255,.4);margin-bottom:8px;display:flex;align-items:center;gap:5px;text-transform:uppercase;letter-spacing:1px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font-size:10px;padding:5px 11px;border-radius:3px;border:1px solid rgba(192,0,12,.4);cursor:pointer;background:transparent;color:rgba(255,255,255,.55);transition:all .15s;text-transform:uppercase;letter-spacing:.5px;font-weight:500}
+.chip.active{background:var(--vm);border-color:var(--vm);color:var(--branco)}
+.chip:hover:not(.active){border-color:var(--vm);color:var(--branco)}
+
+/* TOOLBAR */
+.toolbar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+.toolbar input[type=text]{flex:1;min-width:140px;font-size:11px;background:var(--preto2);border:1px solid rgba(192,0,12,.3);color:var(--branco);border-radius:4px;padding:9px 12px;text-transform:uppercase;letter-spacing:.5px;font-family:inherit}
+.toolbar input[type=text]::placeholder{color:rgba(255,255,255,.25)}
+.toolbar input[type=text]:focus{outline:none;border-color:var(--vm)}
+.toolbar select{font-size:11px;background:var(--preto2);border:1px solid rgba(192,0,12,.3);color:var(--branco);border-radius:4px;padding:9px 10px;text-transform:uppercase;letter-spacing:.5px;cursor:pointer;font-family:inherit}
+.toolbar select:focus{outline:none;border-color:var(--vm)}
+.toolbar select option{background:var(--preto2)}
+.btn{font-size:10px;padding:9px 14px;cursor:pointer;border-radius:4px;display:inline-flex;align-items:center;gap:6px;text-transform:uppercase;letter-spacing:.8px;font-weight:600;transition:all .15s;white-space:nowrap;font-family:inherit}
+.btn-ic{background:var(--preto2);border:1px solid rgba(192,0,12,.4);color:rgba(255,255,255,.7);border-radius:4px;padding:9px 10px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all .15s}
+.btn-ic:hover{background:var(--vm);border-color:var(--vm);color:var(--branco)}
+.btn.primary{background:var(--vm);border:1px solid var(--vm2);color:var(--branco)}
+.btn.primary:hover{background:var(--vm2)}
+.btn.pdf-btn{background:var(--preto2);border:1px solid rgba(192,0,12,.5);color:rgba(255,255,255,.7)}
+.btn.pdf-btn:hover{background:var(--vm);color:var(--branco);border-color:var(--vm)}
+.btn.api-sync{background:var(--preto2);border:1px solid var(--azul);color:var(--azul)}
+.btn.api-sync:hover{background:var(--azul);color:var(--branco)}
+.btn.outline{background:transparent;border:1px solid rgba(192,0,12,.4);color:rgba(255,255,255,.6)}
+.btn.outline:hover{border-color:var(--vm);color:var(--branco)}
+.btn.danger-btn{background:transparent;border:1px solid rgba(192,0,12,.25);color:rgba(255,255,255,.4)}
+.btn.danger-btn:hover{background:var(--vm);color:var(--branco);border-color:var(--vm)}
+
+/* LISTA */
+.items-grid{display:flex;flex-direction:column;gap:8px}
+.item-card{background:var(--preto2);border:1px solid rgba(192,0,12,.2);border-radius:4px;padding:14px 16px;transition:border-color .15s}
+.item-card:hover{border-color:rgba(192,0,12,.6)}
+.item-card.from-api{border-left:3px solid var(--azul)}
+.item-card.from-pdf{border-left:3px solid var(--amarelo)}
+.item-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.item-title{font-size:12px;font-weight:700;color:var(--branco);margin-bottom:6px;line-height:1.4;text-transform:uppercase;letter-spacing:.5px}
+.item-meta{display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-bottom:6px}
+.badge{font-size:9px;padding:3px 9px;border-radius:3px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;display:inline-flex;align-items:center;gap:4px}
+.badge.indicacao{background:var(--vm);color:var(--branco)}
+.badge.projeto{background:var(--preto);color:var(--vm);border:1px solid var(--vm)}
+.badge.aprovada{background:#0D1A15;color:var(--verde);border:1px solid var(--verde)}
+.badge.requerimento{background:#0D1220;color:var(--azul);border:1px solid var(--azul)}
+.badge.topic{background:var(--preto3);color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.12)}
+.badge.st-em-tramitacao{color:var(--amarelo);border:1px solid var(--amarelo);background:transparent}
+.badge.st-aprovado{color:var(--verde);border:1px solid var(--verde);background:transparent}
+.badge.st-arquivado{color:rgba(255,255,255,.35);border:1px solid rgba(255,255,255,.18);background:transparent}
+.badge.api-tag{color:var(--azul);border:1px solid rgba(74,158,232,.4);background:rgba(74,158,232,.08)}
+.badge.pdf-tag{color:var(--amarelo);border:1px solid rgba(239,159,39,.35);background:rgba(239,159,39,.08)}
+.item-desc{font-size:11px;color:rgba(255,255,255,.45);line-height:1.55;margin-bottom:4px}
+.item-link{font-size:10px;color:rgba(74,158,232,.7);text-decoration:none;display:inline-flex;align-items:center;gap:3px;margin-bottom:4px}
+.item-link:hover{color:var(--azul)}
+.item-actions{display:flex;gap:5px;flex-shrink:0}
+.date{font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.3px}
+.lang-box{background:var(--preto);border-left:3px solid var(--vm);border-radius:0 3px 3px 0;padding:10px 12px;margin-top:8px}
+.lang-label{font-size:9px;color:var(--vm);margin-bottom:4px;display:flex;align-items:center;gap:4px;text-transform:uppercase;letter-spacing:.8px;font-weight:700}
+.lang-text{font-size:11px;color:rgba(255,255,255,.6);line-height:1.6}
+.empty{text-align:center;padding:3rem 1rem;color:rgba(255,255,255,.25);font-size:11px;text-transform:uppercase;letter-spacing:1px}
+.empty i{font-size:36px;display:block;margin-bottom:12px;color:var(--vm);opacity:.3}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.82);display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;z-index:1000;overflow-y:auto}
+.modal{background:var(--preto2);border:1px solid var(--vm);border-radius:4px;width:100%;max-width:560px}
+.modal-header{background:var(--vm);padding:14px 18px;border-radius:3px 3px 0 0}
+.modal-header h2{font-size:12px;font-weight:700;color:var(--branco);text-transform:uppercase;letter-spacing:1.5px;display:flex;align-items:center;gap:8px}
+.modal-body{padding:18px}
+.field{margin-bottom:12px}
+.field label{font-size:10px;color:var(--vm);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px;font-weight:700}
+.field input,.field select,.field textarea{width:100%;font-size:11px;background:var(--preto);border:1px solid rgba(192,0,12,.35);color:var(--branco);border-radius:3px;padding:8px 10px;font-family:inherit}
+.field input{text-transform:uppercase;letter-spacing:.3px}
+.field textarea{min-height:80px;resize:vertical;font-size:12px}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--vm)}
+.field select option{background:var(--preto2)}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;padding:14px 18px;border-top:1px solid rgba(192,0,12,.2)}
+.pdf-drop{border:1.5px dashed rgba(192,0,12,.4);border-radius:4px;padding:2.5rem;text-align:center;cursor:pointer;transition:all .15s;background:var(--preto)}
+.pdf-drop:hover,.pdf-drop.dragover{border-color:var(--vm);background:rgba(192,0,12,.08)}
+.pdf-drop i{font-size:32px;color:var(--vm);display:block;margin-bottom:10px}
+.pdf-drop p{font-size:11px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.5px}
+.pdf-drop small{font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;margin-top:4px;display:block}
+.ai-loading{text-align:center;padding:2.5rem 1rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin{animation:spin 1s linear infinite;display:inline-block}
+
+@media(max-width:640px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .api-grid{grid-template-columns:repeat(2,1fr)}
+  .topo{flex-direction:column;align-items:flex-start}
+  .topo-dir{padding-top:0;padding-bottom:14px;width:100%}
+  .tabs{overflow-x:auto}
+  .tab{font-size:9px;padding:9px 10px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- TOPO -->
+<div class="topo">
+  <div class="topo-esq">
+    <div class="logo-box"><i class="ti ti-building-bank"></i></div>
+    <div>
+      <div class="topo-titulo">GESTÃO LEGISLATIVA</div>
+      <div class="topo-sub" id="subTitulo">CARREGANDO DADOS...</div>
+    </div>
+  </div>
+  <div class="topo-dir">
+    <div class="dep-badge" id="depBadge" onclick="toggleApiPanel()" title="DADOS DA CÂMARA">
+      <img class="dep-foto" id="depFoto" src="" alt="">
+      <div class="dep-info">
+        <div class="dep-nome" id="depNome">MARCOS TAVARES</div>
+        <div class="dep-partido" id="depPartido">PDT-RJ · DEP. FEDERAL</div>
+      </div>
+      <i class="ti ti-chevron-down" style="font-size:13px;color:rgba(255,255,255,.45);margin-left:4px"></i>
+    </div>
+    <div class="sync-badge loading" id="syncBadge"><i class="ti ti-loader spin"></i> <span id="syncText">CONECTANDO</span></div>
+  </div>
+</div>
+
+<!-- PAINEL API (RECOLHÍVEL) -->
+<div class="api-panel-bar" id="apiPanelBar">
+  <div class="api-grid">
+    <div class="api-info-item">
+      <div class="api-info-label">NOME CIVIL</div>
+      <div class="api-info-val" id="apiNome">Marcos Tavares</div>
+    </div>
+    <div class="api-info-item">
+      <div class="api-info-label">PARTIDO / UF</div>
+      <div class="api-info-val" id="apiPartUf">PDT — RJ</div>
+    </div>
+    <div class="api-info-item">
+      <div class="api-info-label">LEGISLATURA</div>
+      <div class="api-info-val" id="apiLeg">57ª</div>
+    </div>
+    <div class="api-info-item">
+      <div class="api-info-label">E-MAIL OFICIAL</div>
+      <div class="api-info-val" id="apiEmail" style="font-size:10px;word-break:break-all">dep.marcostavares@camara.leg.br</div>
+    </div>
+  </div>
+  <div class="api-actions">
+    <div class="api-info-item" style="flex:1">
+      <div class="api-info-label">PROPOSIÇÕES IMPORTADAS DA API CÂMARA</div>
+      <div class="api-info-val"><span id="apiCount">0</span> registros sincronizados</div>
+    </div>
+    <button class="btn api-sync" onclick="syncApiProposicoes()" id="btnSync">
+      <i class="ti ti-refresh"></i> SINCRONIZAR COM API
+    </button>
+    <a href="https://dadosabertos.camara.leg.br/api/v2/deputados/220604" target="_blank" class="btn outline" style="font-size:10px">
+      <i class="ti ti-external-link"></i> VER NA API
+    </a>
+  </div>
+</div>
+
+<!-- BANNER INICIAL -->
+<div class="api-banner" id="apiBanner" style="display:none">
+  <i class="ti ti-info-circle" style="font-size:16px;color:var(--azul)"></i>
+  <span>CLIQUE EM "SINCRONIZAR API" NO PAINEL DO DEPUTADO PARA IMPORTAR AS PROPOSIÇÕES DIRETAMENTE DA CÂMARA DOS DEPUTADOS</span>
+  <button class="api-btn" onclick="document.getElementById('apiBanner').style.display='none';toggleApiPanel()">ABRIR PAINEL</button>
+</div>
+
+<!-- CORPO -->
+<div class="corpo">
+  <div class="stats" id="stats"></div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('todos')">TODOS</button>
+    <button class="tab" onclick="switchTab('indicacao')">INDICAÇÕES</button>
+    <button class="tab" onclick="switchTab('projeto')">PROJETOS DE LEI</button>
+    <button class="tab" onclick="switchTab('requerimento')">REQUERIMENTOS</button>
+    <button class="tab" onclick="switchTab('aprovada')">LEIS APROVADAS</button>
+  </div>
+
+  <div class="filter-bar">
+    <div class="filter-label"><i class="ti ti-filter" style="font-size:12px"></i> FILTRAR POR ASSUNTO — SUGESTÃO DE LINGUAGEM</div>
+    <div class="chips" id="chipsGrid"></div>
+  </div>
+
+  <div class="toolbar">
+    <input type="text" placeholder="BUSCAR PROPOSTA..." id="searchInput" oninput="renderList()">
+    <select id="statusFilter" onchange="renderList()">
+      <option value="">TODOS OS STATUS</option>
+      <option value="em-tramitacao">EM TRAMITAÇÃO</option>
+      <option value="aprovado">APROVADO</option>
+      <option value="arquivado">ARQUIVADO</option>
+    </select>
+    <select id="origemFilter" onchange="renderList()">
+      <option value="">TODAS AS ORIGENS</option>
+      <option value="manual">MANUAL</option>
+      <option value="api">VIA API CÂMARA</option>
+      <option value="pdf">VIA PDF</option>
+    </select>
+    <button class="btn pdf-btn" onclick="openPdfModal()"><i class="ti ti-file-type-pdf"></i> IMPORTAR PDF</button>
+    <button class="btn-ic" onclick="exportData()" title="EXPORTAR BACKUP JSON"><i class="ti ti-download"></i></button>
+    <button class="btn-ic" onclick="triggerImport()" title="IMPORTAR BACKUP JSON"><i class="ti ti-upload"></i></button>
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importBackup(event)">
+    <button class="btn primary" onclick="openModal()"><i class="ti ti-plus"></i> NOVA PROPOSTA</button>
+  </div>
+
+  <div class="items-grid" id="itemsList"></div>
+</div>
+
+<div id="modalContainer"></div>
+
+<script>
+// ========================
+// CONFIG
+// ========================
+const DEP_ID = 220604;
+const API_BASE = 'https://dadosabertos.camara.leg.br/api/v2';
+const STORAGE_KEY = 'gestao_legislativa_v2';
+const TOPICS = ['Saúde','Educação','Infraestrutura','Segurança','Meio Ambiente','Habitação','Transporte','Cultura','Esporte','Assistência Social','Economia','Tecnologia'];
+const LANG = {
+  'Saúde':'Considerando a essencialidade dos serviços de saúde à população, esta iniciativa visa garantir o acesso universal e de qualidade aos cuidados médicos, em consonância com o art. 196 da Constituição Federal.',
+  'Educação':'Com vistas ao fortalecimento da educação pública e à formação integral dos cidadãos, esta proposta busca ampliar as oportunidades de aprendizagem e reduzir as desigualdades educacionais.',
+  'Infraestrutura':'Tendo em vista a necessidade de melhoria das condições urbanísticas e de mobilidade, este instrumento visa promover obras e serviços de infraestrutura que beneficiem diretamente a população.',
+  'Segurança':'Visando à proteção da ordem pública e à garantia da incolumidade das pessoas e do patrimônio, esta proposição fomenta ações de prevenção e enfrentamento à violência.',
+  'Meio Ambiente':'Em atenção ao desenvolvimento sustentável e à preservação do patrimônio ambiental para as gerações futuras, esta medida promove práticas de conservação ecológica e uso responsável dos recursos naturais.',
+  'Habitação':'Com o objetivo de assegurar o direito à moradia digna previsto no art. 6º da Constituição Federal, esta proposição visa ampliar o acesso à habitação de interesse social para famílias de baixa renda.',
+  'Transporte':'Considerando a mobilidade urbana como direito fundamental ao pleno exercício da cidadania, esta iniciativa busca aprimorar o sistema de transporte coletivo e individual.',
+  'Cultura':'Reconhecendo a cultura como elemento identitário do povo e direito social garantido constitucionalmente, esta proposição incentiva a produção, difusão e preservação das manifestações culturais.',
+  'Esporte':'Com vistas à promoção da saúde, da integração social e do desenvolvimento humano por meio do esporte e do lazer, esta medida amplia o acesso das comunidades às práticas esportivas.',
+  'Assistência Social':'Fundamentada nos princípios da proteção social e da dignidade humana, esta proposta fortalece a rede de assistência social, garantindo atendimento prioritário às populações vulneráveis.',
+  'Economia':'Objetivando o desenvolvimento econômico e a geração de emprego e renda, esta iniciativa fomenta o empreendedorismo, a inovação e o fortalecimento das atividades produtivas.',
+  'Tecnologia':'Considerando a transformação digital como vetor de desenvolvimento e modernização da gestão pública, esta proposição visa ampliar o acesso à tecnologia em benefício dos cidadãos.'
+};
+
+// ========================
+// ESTADO
+// ========================
+let items = [], nextId = 1, currentTab = 'todos', activeTopics = [], editingId = null, apiPanelOpen = false;
+
+// ========================
+// STORAGE
+// ========================
+function setSyncBadge(state, msg) {
+  const b = document.getElementById('syncBadge');
+  const icons = { ok:'ti-device-floppy', err:'ti-alert-circle', saving:'ti-loader spin', loading:'ti-loader spin' };
+  b.className = 'sync-badge ' + state;
+  b.innerHTML = `<i class="ti ${icons[state]||'ti-check'}"></i> <span>${msg}</span>`;
+}
+function loadData() {
+  try {
+    const r = localStorage.getItem(STORAGE_KEY);
+    if (r) {
+      const d = JSON.parse(r);
+      items = d.items || [];
+      nextId = d.nextId || (items.length ? Math.max(...items.map(i => i.id)) + 1 : 1);
+    }
+  } catch(e) {}
+}
+function saveData() {
+  try {
+    setSyncBadge('saving', 'SALVANDO...');
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ items, nextId }));
+    setSyncBadge('ok', 'SALVO');
+    setTimeout(() => setSyncBadge('ok', 'PRONTO'), 1200);
+  } catch(e) { setSyncBadge('err', 'ERRO AO SALVAR'); }
+}
+function exportData() {
+  const blob = new Blob([JSON.stringify({ items, nextId }, null, 2)], { type:'application/json' });
+  const u = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = u; a.download = 'gestao_marcos_tavares_backup.json'; a.click();
+  URL.revokeObjectURL(u);
+}
+function triggerImport() { document.getElementById('importFile').click(); }
+function importBackup(e) {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    try {
+      const d = JSON.parse(ev.target.result);
+      if (d.items) {
+        items = d.items;
+        nextId = d.nextId || (items.length ? Math.max(...items.map(i => i.id)) + 1 : 1);
+        saveData(); renderAll();
+        setSyncBadge('ok', 'IMPORTADO!');
+        atualizarContadorApi();
+      }
+    } catch(err) { setSyncBadge('err', 'ARQUIVO INVÁLIDO'); }
+  };
+  r.readAsText(f); e.target.value = '';
+}
+
+// ========================
+// API DA CÂMARA
+// ========================
+async function fetchDeputado() {
+  // Dados fixos do Dep. Marcos Tavares (evita erro 400 ao buscar perfil)
+  atualizarUIDeputado({
+    nomeCivil: 'Marcos Tavares',
+    nomeEleitoral: 'MARCOS TAVARES',
+    siglaPartido: 'PDT',
+    siglaUf: 'RJ',
+    idLegislatura: 57,
+    email: 'dep.marcostavares@camara.leg.br',
+    urlFoto: `https://www.camara.leg.br/internet/deputado/bandep/${DEP_ID}.jpg`
+  });
+  setSyncBadge('ok', 'PRONTO');
+}
+
+function atualizarUIDeputado(dep) {
+  const nome = dep.nomeEleitoral || dep.nomeCivil || 'MARCOS TAVARES';
+  const partido = dep.siglaPartido || 'PDT';
+  const uf = dep.siglaUf || 'RJ';
+  const foto = dep.urlFoto || `https://www.camara.leg.br/internet/deputado/bandep/${DEP_ID}.jpg`;
+  document.getElementById('subTitulo').textContent = `${nome} — DEP. FEDERAL ${partido}-${uf}`;
+  document.getElementById('depNome').textContent = nome;
+  document.getElementById('depPartido').textContent = `${partido}-${uf} · DEP. FEDERAL`;
+  const img = document.getElementById('depFoto');
+  img.src = foto;
+  img.onerror = () => { img.style.display = 'none'; };
+  document.getElementById('apiNome').textContent = dep.nomeCivil || nome;
+  document.getElementById('apiPartUf').textContent = `${partido} — ${uf}`;
+  document.getElementById('apiLeg').textContent = dep.idLegislatura ? `${dep.idLegislatura}ª LEGISLATURA` : '57ª LEGISLATURA';
+  document.getElementById('apiEmail').textContent = dep.email || 'dep.marcostavares@camara.leg.br';
+  atualizarContadorApi();
+}
+
+function atualizarContadorApi() {
+  const n = items.filter(i => i.origem === 'api').length;
+  document.getElementById('apiCount').textContent = n;
+}
+
+function toggleApiPanel() {
+  apiPanelOpen = !apiPanelOpen;
+  document.getElementById('apiPanelBar').classList.toggle('open', apiPanelOpen);
+}
+
+function detectarTopic(ementa) {
+  const t = (ementa || '').toLowerCase();
+  if (t.includes('saúde') || t.includes('saude') || t.includes('hospital') || t.includes('médic') || t.includes('medic') || t.includes('enferm')) return 'Saúde';
+  if (t.includes('educa') || t.includes('escola') || t.includes('ensino') || t.includes('universidade') || t.includes('professor')) return 'Educação';
+  if (t.includes('infraestrutura') || t.includes('obra') || t.includes('paviment') || t.includes('calçada') || t.includes('estrada')) return 'Infraestrutura';
+  if (t.includes('segur') || t.includes('policia') || t.includes('polícia') || t.includes('crime') || t.includes('violência')) return 'Segurança';
+  if (t.includes('meio ambiente') || t.includes('ambiental') || t.includes('sustent') || t.includes('ecolog') || t.includes('floresta')) return 'Meio Ambiente';
+  if (t.includes('habitação') || t.includes('habitacao') || t.includes('moradia') || t.includes('casa popular') || t.includes('conjunto habitacional')) return 'Habitação';
+  if (t.includes('transporte') || t.includes('ônibus') || t.includes('metrô') || t.includes('trem') || t.includes('mobilidade')) return 'Transporte';
+  if (t.includes('cultura') || t.includes('patrimônio') || t.includes('museu') || t.includes('teatro') || t.includes('arte')) return 'Cultura';
+  if (t.includes('esporte') || t.includes('lazer') || t.includes('quadra') || t.includes('parque') || t.includes('recreação')) return 'Esporte';
+  if (t.includes('assistência social') || t.includes('vulnerabilidade') || t.includes('criança') || t.includes('idoso') || t.includes('bolsa')) return 'Assistência Social';
+  if (t.includes('econom') || t.includes('empreg') || t.includes('renda') || t.includes('tribut') || t.includes('imposto')) return 'Economia';
+  if (t.includes('tecnologia') || t.includes('digital') || t.includes('internet') || t.includes('inovação') || t.includes('dados')) return 'Tecnologia';
+  return 'Saúde';
+}
+
+function detectarStatus(ementa, situacao) {
+  const t = ((ementa || '') + ' ' + (situacao || '')).toLowerCase();
+  if (t.includes('arquiv') || t.includes('encerr') || t.includes('prejudic')) return 'arquivado';
+  if (t.includes('aprovad') || t.includes('sancionad') || t.includes('promulgad')) return 'aprovado';
+  return 'em-tramitacao';
+}
+
+// URLs testadas e válidas da API da Câmara (requerem chamada direto do browser)
+// A API bloqueia servidores intermediários — deve ser chamada do browser do usuário
+const API_URLS = [
+  // Proposições por ID do deputado (mais preciso)
+  `${API_BASE}/proposicoes?idDeputadoAutor=${DEP_ID}&dataInicio=2023-01-01&itens=100&ordem=desc&ordenarPor=dataApresentacao`,
+  // Fallback: por ano recente
+  `${API_BASE}/proposicoes?idDeputadoAutor=${DEP_ID}&dataInicio=2019-01-01&itens=100&ordem=desc&ordenarPor=dataApresentacao`,
+];
+
+async function tryFetch(url) {
+  const r = await fetch(url, { headers: { 'Accept': 'application/json' } });
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  return r.json();
+}
+
+async function syncApiProposicoes() {
+  const btn = document.getElementById('btnSync');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ti ti-loader spin"></i> BUSCANDO...';
+  setSyncBadge('loading', 'BUSCANDO API...');
+
+  let sucesso = false;
+  for (const url of API_URLS) {
+    try {
+      const data = await tryFetch(url);
+      await processarProposicoes(data.dados || []);
+      sucesso = true;
+      break;
+    } catch(e) {
+      console.warn('URL falhou:', url, e.message);
+    }
+  }
+
+  if (!sucesso) {
+    setSyncBadge('err', 'ERRO NA API');
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ti ti-refresh"></i> SINCRONIZAR COM API';
+    alert(
+      'Não foi possível conectar à API da Câmara dos Deputados.\n\n' +
+      'Possíveis causas:\n' +
+      '• Você está abrindo o arquivo local (file://) — a API bloqueia isso\n' +
+      '• Sem conexão com a internet\n' +
+      '• A API da Câmara está temporariamente fora\n\n' +
+      'SOLUÇÃO: Hospede o arquivo em um servidor (ex: Netlify, GitHub Pages) ou use o cadastro manual.'
+    );
+  }
+}
+
+async function processarProposicoes(proposicoes) {
+  const btn = document.getElementById('btnSync');
+  let novas = 0;
+
+  for (const prop of proposicoes) {
+    if (items.some(i => i.apiId === prop.id)) continue;
+
+    const sig = (prop.siglaTipo || '').toUpperCase();
+    let type = 'indicacao';
+    if (['PL','PEC','PDL','MPV','PLP','PLS'].includes(sig)) type = 'projeto';
+    else if (['REQ','RIC','RCP','MSC','RFC','RCP'].includes(sig)) type = 'requerimento';
+
+    const ementa = prop.ementa || '';
+    const numero = prop.numero || '';
+    const ano = prop.ano || '';
+    const titulo = `${sig} ${numero}${ano ? '/'+ano : ''} — ${ementa.substring(0, 80)}${ementa.length > 80 ? '...' : ''}`.trim();
+
+    items.push({
+      id: nextId++,
+      apiId: prop.id,
+      type,
+      title: titulo,
+      topic: detectarTopic(ementa),
+      status: detectarStatus(ementa, ''),
+      date: prop.dataApresentacao ? prop.dataApresentacao.split('T')[0] : '',
+      desc: ementa,
+      origem: 'api',
+      urlCamara: `https://www.camara.leg.br/proposicoesWeb/fichadetramitacao?idProposicao=${prop.id}`
+    });
+    novas++;
+  }
+
+  atualizarContadorApi();
+  saveData();
+  renderAll();
+  setSyncBadge('ok', novas > 0 ? `+${novas} IMPORTADAS` : 'JÁ ATUALIZADO');
+  setTimeout(() => setSyncBadge('ok', 'PRONTO'), 2500);
+  btn.disabled = false;
+  btn.innerHTML = '<i class="ti ti-refresh"></i> SINCRONIZAR COM API';
+}
+
+// ========================
+// TABS / FILTROS
+// ========================
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    t.classList.toggle('active', ['todos','indicacao','projeto','requerimento','aprovada'][i] === tab);
+  });
+  renderList();
+}
+function toggleTopic(t) {
+  const i = activeTopics.indexOf(t);
+  if (i > -1) activeTopics.splice(i, 1); else activeTopics.push(t);
+  renderChips(); renderList();
+}
+function renderChips() {
+  document.getElementById('chipsGrid').innerHTML = TOPICS.map(t =>
+    `<button class="chip${activeTopics.includes(t)?' active':''}" onclick="toggleTopic('${t}')">${t.toUpperCase()}</button>`
+  ).join('');
+}
+
+// ========================
+// RENDER
+// ========================
+function renderStats() {
+  const total = items.length;
+  const ind = items.filter(i => i.type === 'indicacao').length;
+  const proj = items.filter(i => i.type === 'projeto').length;
+  const req = items.filter(i => i.type === 'requerimento').length;
+  const apr = items.filter(i => i.type === 'aprovada').length;
+  const api = items.filter(i => i.origem === 'api').length;
+  document.getElementById('stats').innerHTML = `
+    <div class="stat"><div class="stat-num">${total}</div><div class="stat-label">TOTAL DE PROPOSTAS</div><div class="stat-sub">${api} VIA API CÂMARA</div></div>
+    <div class="stat"><div class="stat-num">${ind}</div><div class="stat-label">INDICAÇÕES</div><div class="stat-sub">${proj} PROJETOS DE LEI</div></div>
+    <div class="stat"><div class="stat-num">${req}</div><div class="stat-label">REQUERIMENTOS</div><div class="stat-sub">IMPORTADOS DA API</div></div>
+    <div class="stat"><div class="stat-num">${apr}</div><div class="stat-label">LEIS APROVADAS</div><div class="stat-sub">REGISTRADAS</div></div>`;
+}
+
+function renderList() {
+  const search = (document.getElementById('searchInput')?.value || '').toLowerCase();
+  const sf = document.getElementById('statusFilter')?.value || '';
+  const of = document.getElementById('origemFilter')?.value || '';
+
+  const filtered = items.filter(i => {
+    if (currentTab !== 'todos' && i.type !== currentTab) return false;
+    if (sf && i.status !== sf) return false;
+    if (of === 'api' && i.origem !== 'api') return false;
+    if (of === 'pdf' && !i.fromPdf) return false;
+    if (of === 'manual' && (i.origem === 'api' || i.fromPdf)) return false;
+    if (activeTopics.length && !activeTopics.includes(i.topic)) return false;
+    if (search && !i.title.toLowerCase().includes(search) && !(i.desc || '').toLowerCase().includes(search)) return false;
+    return true;
+  });
+
+  const el = document.getElementById('itemsList');
+  if (!filtered.length) {
+    el.innerHTML = `<div class="empty"><i class="ti ti-file-off"></i>NENHUMA PROPOSTA ENCONTRADA<br><small style="font-size:10px;margin-top:6px;display:block;opacity:.5">AJUSTE OS FILTROS OU CLIQUE EM "NOVA PROPOSTA"</small></div>`;
+    return;
+  }
+
+  const TL = { indicacao:'INDICAÇÃO', projeto:'PROJETO DE LEI', aprovada:'LEI APROVADA', requerimento:'REQUERIMENTO' };
+  const SL = { 'em-tramitacao':'EM TRAMITAÇÃO', aprovado:'APROVADO', arquivado:'ARQUIVADO' };
+  const IC = { indicacao:'ti-file-text', projeto:'ti-file-certificate', aprovada:'ti-check', requerimento:'ti-file-description' };
+
+  el.innerHTML = filtered.map(item => {
+    const showLang = activeTopics.includes(item.topic) && LANG[item.topic];
+    const cardCls = item.origem === 'api' ? ' from-api' : item.fromPdf ? ' from-pdf' : '';
+    return `<div class="item-card${cardCls}">
+      <div class="item-top">
+        <div style="flex:1;min-width:0">
+          <div class="item-title">${escHtml(item.title)}</div>
+          <div class="item-meta">
+            <span class="badge ${item.type}"><i class="ti ${IC[item.type]||'ti-file'}" style="font-size:9px"></i> ${TL[item.type]||item.type}</span>
+            <span class="badge topic"><i class="ti ti-tag" style="font-size:9px"></i> ${item.topic.toUpperCase()}</span>
+            <span class="badge st-${item.status}">${SL[item.status]||item.status}</span>
+            ${item.date ? `<span class="date"><i class="ti ti-calendar" style="font-size:9px"></i> ${fmtDate(item.date)}</span>` : ''}
+            ${item.origem==='api' ? '<span class="badge api-tag"><i class="ti ti-world" style="font-size:9px"></i> API CÂMARA</span>' : ''}
+            ${item.fromPdf ? '<span class="badge pdf-tag"><i class="ti ti-file-type-pdf" style="font-size:9px"></i> PDF</span>' : ''}
+          </div>
+          ${item.desc ? `<div class="item-desc">${escHtml(item.desc.substring(0,200))}${item.desc.length>200?'...':''}</div>` : ''}
+          ${item.urlCamara ? `<a href="${escHtml(item.urlCamara)}" target="_blank" class="item-link"><i class="ti ti-external-link" style="font-size:10px"></i> VER TRAMITAÇÃO NA CÂMARA</a>` : ''}
+          ${showLang ? `<div class="lang-box"><div class="lang-label"><i class="ti ti-text-size" style="font-size:10px"></i> SUGESTÃO DE LINGUAGEM — ${item.topic.toUpperCase()}</div><div class="lang-text">${LANG[item.topic]}</div></div>` : ''}
+        </div>
+        <div class="item-actions">
+          <button class="btn-ic" onclick="openModal(${item.id})" title="EDITAR"><i class="ti ti-edit"></i></button>
+          <button class="btn-ic" onclick="deleteItem(${item.id})" title="EXCLUIR" style="background:#1A0000;border-color:#5A0005"><i class="ti ti-trash"></i></button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderAll() { renderChips(); renderStats(); renderList(); }
+function fmtDate(d) { if (!d) return ''; const p = d.split('-'); return p.length===3 ? `${p[2]}/${p[1]}/${p[0]}` : d; }
+function escHtml(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function deleteItem(id) {
+  if (!confirm('EXCLUIR ESTA PROPOSTA?')) return;
+  items = items.filter(i => i.id !== id);
+  renderAll(); saveData();
+}
+
+// ========================
+// MODAL MANUAL
+// ========================
+function openModal(id = null) {
+  editingId = id;
+  const item = id ? items.find(i => i.id === id) : null;
+  document.getElementById('modalContainer').innerHTML = `
+  <div class="modal-overlay" onclick="closeModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header"><h2><i class="ti ti-file-text"></i> ${item?'EDITAR PROPOSTA':'NOVA PROPOSTA'}</h2></div>
+      <div class="modal-body">
+        <div class="field"><label>TIPO</label><select id="f-type">
+          <option value="indicacao"${item?.type==='indicacao'?' selected':''}>INDICAÇÃO</option>
+          <option value="projeto"${item?.type==='projeto'?' selected':''}>PROJETO DE LEI</option>
+          <option value="requerimento"${item?.type==='requerimento'?' selected':''}>REQUERIMENTO</option>
+          <option value="aprovada"${item?.type==='aprovada'?' selected':''}>LEI APROVADA</option>
+        </select></div>
+        <div class="field"><label>TÍTULO</label><input type="text" id="f-title" value="${escHtml(item?.title||'')}" placeholder="EX: IND. 123/2024 — MELHORIA DA PRAÇA..."></div>
+        <div class="field"><label>ASSUNTO</label><select id="f-topic">${TOPICS.map(t=>`<option value="${t}"${item?.topic===t?' selected':''}>${t.toUpperCase()}</option>`).join('')}</select></div>
+        <div class="field"><label>STATUS</label><select id="f-status">
+          <option value="em-tramitacao"${item?.status==='em-tramitacao'?' selected':''}>EM TRAMITAÇÃO</option>
+          <option value="aprovado"${item?.status==='aprovado'?' selected':''}>APROVADO</option>
+          <option value="arquivado"${item?.status==='arquivado'?' selected':''}>ARQUIVADO</option>
+        </select></div>
+        <div class="field"><label>DATA</label><input type="date" id="f-date" value="${item?.date||new Date().toISOString().slice(0,10)}"></div>
+        <div class="field"><label>DESCRIÇÃO / EMENTA</label><textarea id="f-desc">${escHtml(item?.desc||'')}</textarea></div>
+        <div class="field"><label>LINK DA CÂMARA (OPCIONAL)</label><input type="text" id="f-url" value="${escHtml(item?.urlCamara||'')}" placeholder="HTTPS://WWW.CAMARA.LEG.BR/..."></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn outline" onclick="closeModal()">CANCELAR</button>
+        <button class="btn primary" onclick="saveItem()"><i class="ti ti-check"></i> SALVAR</button>
+      </div>
+    </div>
+  </div>`;
+}
+function closeModal(e) {
+  if (!e || e.target.classList.contains('modal-overlay')) {
+    document.getElementById('modalContainer').innerHTML = '';
+    editingId = null;
+  }
+}
+function saveItem() {
+  const title = document.getElementById('f-title').value.trim();
+  if (!title) { alert('INFORME O TÍTULO.'); return; }
+  const d = {
+    type: document.getElementById('f-type').value,
+    title: title.toUpperCase(),
+    topic: document.getElementById('f-topic').value,
+    status: document.getElementById('f-status').value,
+    date: document.getElementById('f-date').value,
+    desc: document.getElementById('f-desc').value.trim(),
+    urlCamara: document.getElementById('f-url').value.trim()
+  };
+  if (editingId) {
+    const idx = items.findIndex(i => i.id === editingId);
+    items[idx] = { ...items[idx], ...d };
+  } else {
+    items.push({ id: nextId++, origem: 'manual', ...d });
+  }
+  document.getElementById('modalContainer').innerHTML = '';
+  editingId = null;
+  renderAll(); saveData();
+}
+
+// ========================
+// MODAL PDF (IA)
+// ========================
+function openPdfModal() {
+  document.getElementById('modalContainer').innerHTML = `
+  <div class="modal-overlay" onclick="closePdfModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header"><h2><i class="ti ti-file-type-pdf"></i> IMPORTAR PROPOSTA VIA PDF</h2></div>
+      <div class="modal-body">
+        <div id="pdfStep">
+          <div class="pdf-drop" id="pdfDrop"
+            onclick="document.getElementById('pdfFileInput').click()"
+            ondragover="event.preventDefault();this.classList.add('dragover')"
+            ondragleave="this.classList.remove('dragover')"
+            ondrop="handleDrop(event)">
+            <i class="ti ti-cloud-upload"></i>
+            <p>CLIQUE OU ARRASTE O PDF AQUI</p>
+            <small>A IA EXTRAI OS DADOS AUTOMATICAMENTE</small>
+          </div>
+          <input type="file" id="pdfFileInput" accept=".pdf" style="display:none" onchange="handlePdfFile(event)">
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+function closePdfModal(e) {
+  if (!e || e.target.classList.contains('modal-overlay'))
+    document.getElementById('modalContainer').innerHTML = '';
+}
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('pdfDrop').classList.remove('dragover');
+  const f = e.dataTransfer.files[0];
+  if (f && f.type === 'application/pdf') processPdf(f);
+  else alert('SELECIONE UM ARQUIVO PDF.');
+}
+function handlePdfFile(e) { const f = e.target.files[0]; if (f) processPdf(f); e.target.value = ''; }
+
+async function processPdf(file) {
+  const step = document.getElementById('pdfStep');
+  step.innerHTML = `<div class="ai-loading">
+    <i class="ti ti-brain spin" style="color:#C0000C;font-size:32px;display:inline-block"></i>
+    <p style="color:#fff;font-weight:700;margin:14px 0 6px;text-transform:uppercase;letter-spacing:1px">PROCESSANDO PDF COM IA...</p>
+    <p style="font-size:10px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.5px">AGUARDE — EXTRAINDO DADOS AUTOMATICAMENTE</p>
+  </div>`;
+  try {
+    const base64 = await fileToBase64(file);
+    const prompt = `Você é especialista em documentos legislativos brasileiros. Leia o PDF e extraia a proposta. Retorne SOMENTE JSON válido, sem markdown:\n{"type":"indicacao","title":"título completo em maiúsculas","topic":"Saúde","status":"em-tramitacao","date":"2024-03-15","desc":"ementa em até 3 linhas"}\ntype: indicacao | projeto | requerimento | aprovada\ntopic: Saúde | Educação | Infraestrutura | Segurança | Meio Ambiente | Habitação | Transporte | Cultura | Esporte | Assistência Social | Economia | Tecnologia\nstatus: em-tramitacao | aprovado | arquivado\ndate: YYYY-MM-DD`;
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: [
+          { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } },
+          { type: 'text', text: prompt }
+        ]}]
+      })
+    });
+    if (!resp.ok) throw new Error(`ERRO HTTP ${resp.status}`);
+    const data = await resp.json();
+    const text = data.content?.find(c => c.type === 'text')?.text || '';
+    const m = text.match(/\{[\s\S]*\}/);
+    if (!m) throw new Error('RESPOSTA INVÁLIDA DA IA');
+    showPdfForm(JSON.parse(m[0]));
+  } catch(err) {
+    step.innerHTML = `<div class="ai-loading">
+      <i class="ti ti-alert-circle" style="color:#C0000C;font-size:32px;display:block;margin-bottom:12px"></i>
+      <p style="color:#fff;font-weight:700;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px">ERRO AO PROCESSAR PDF</p>
+      <p style="font-size:10px;color:rgba(255,255,255,.35);text-transform:uppercase;margin-bottom:16px">${escHtml(err.message)}</p>
+      <div style="display:flex;gap:8px;justify-content:center">
+        <button class="btn outline" onclick="openPdfModal()"><i class="ti ti-refresh"></i> TENTAR NOVAMENTE</button>
+        <button class="btn primary" onclick="showPdfForm({})">PREENCHER MANUAL</button>
+      </div>
+    </div>`;
+  }
+}
+function showPdfForm(p) {
+  const step = document.getElementById('pdfStep');
+  const today = new Date().toISOString().slice(0,10);
+  step.innerHTML = `
+    <p style="font-size:10px;color:var(--verde);margin-bottom:14px;text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;gap:5px"><i class="ti ti-check"></i> DADOS EXTRAÍDOS — REVISE E CONFIRME</p>
+    <div class="field"><label>TIPO</label><select id="pf-type">
+      <option value="indicacao"${p.type==='indicacao'?' selected':''}>INDICAÇÃO</option>
+      <option value="projeto"${p.type==='projeto'?' selected':''}>PROJETO DE LEI</option>
+      <option value="requerimento"${p.type==='requerimento'?' selected':''}>REQUERIMENTO</option>
+      <option value="aprovada"${p.type==='aprovada'?' selected':''}>LEI APROVADA</option>
+    </select></div>
+    <div class="field"><label>TÍTULO</label><input type="text" id="pf-title" value="${escHtml(p.title||'')}"></div>
+    <div class="field"><label>ASSUNTO</label><select id="pf-topic">${TOPICS.map(t=>`<option value="${t}"${p.topic===t?' selected':''}>${t.toUpperCase()}</option>`).join('')}</select></div>
+    <div class="field"><label>STATUS</label><select id="pf-status">
+      <option value="em-tramitacao"${p.status==='em-tramitacao'?' selected':''}>EM TRAMITAÇÃO</option>
+      <option value="aprovado"${p.status==='aprovado'?' selected':''}>APROVADO</option>
+      <option value="arquivado"${p.status==='arquivado'?' selected':''}>ARQUIVADO</option>
+    </select></div>
+    <div class="field"><label>DATA</label><input type="date" id="pf-date" value="${(p.date&&p.date.match(/^\d{4}-\d{2}-\d{2}$/))?p.date:today}"></div>
+    <div class="field"><label>DESCRIÇÃO / EMENTA</label><textarea id="pf-desc">${escHtml(p.desc||'')}</textarea></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;padding-top:14px;border-top:1px solid rgba(192,0,12,.2)">
+      <button class="btn outline" onclick="openPdfModal()"><i class="ti ti-arrow-left"></i> VOLTAR</button>
+      <button class="btn primary" onclick="savePdfItem()"><i class="ti ti-check"></i> CADASTRAR</button>
+    </div>`;
+}
+function savePdfItem() {
+  const title = document.getElementById('pf-title').value.trim();
+  if (!title) { alert('INFORME O TÍTULO.'); return; }
+  items.push({
+    id: nextId++,
+    type: document.getElementById('pf-type').value,
+    title: title.toUpperCase(),
+    topic: document.getElementById('pf-topic').value,
+    status: document.getElementById('pf-status').value,
+    date: document.getElementById('pf-date').value,
+    desc: document.getElementById('pf-desc').value.trim(),
+    fromPdf: true, origem: 'pdf'
+  });
+  document.getElementById('modalContainer').innerHTML = '';
+  renderAll(); saveData();
+  setSyncBadge('ok', 'PROPOSTA CADASTRADA!');
+  setTimeout(() => setSyncBadge('ok', 'PRONTO'), 2000);
+}
+function fileToBase64(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result.split(',')[1]);
+    r.onerror = () => rej(new Error('ERRO AO LER ARQUIVO'));
+    r.readAsDataURL(file);
+  });
+}
+
+// ========================
+// INIT
+// ========================
+loadData();
+renderAll();
+fetchDeputado();
+
+// Banner de boas-vindas se não há dados da API
+setTimeout(() => {
+  if (!items.some(i => i.origem === 'api')) {
+    document.getElementById('apiBanner').style.display = 'flex';
+  }
+}, 1800);
+</script>
+</body>
+</html>
